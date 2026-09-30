@@ -38,41 +38,49 @@ internal sealed partial class DocumentIndex : IDocumentIndex
 
     private ReadOnlyCollection<Document> LoadIndex(string contentRoot)
     {
-        var indexPath = Path.Combine(contentRoot, "data", "index.json");
+            var candidates = new[] {
+                Path.Combine(contentRoot, "data", "index.json"),
+                Path.Combine(contentRoot, "..", "data", "index.json"),
+                Path.Combine(Path.GetFullPath(Path.Combine(contentRoot, "..")), "data", "index.json"),
+                Path.Combine("C:", "src", "trading-mcp", "data", "index.json")
+            };
 
-        if (!File.Exists(indexPath))
+            var indexPath = candidates.FirstOrDefault(p => File.Exists(Path.GetFullPath(p)));
+            if (indexPath == null)
         {
-            LogIndexNotFound(_logger, indexPath);
-            return new ReadOnlyCollection<Document>([]);
-        }
+                LogIndexNotFound(_logger, string.Join(";", candidates));
+                return new ReadOnlyCollection<Document>(Array.Empty<Document>());
+            }
 
-        try
-        {
-            var json = File.ReadAllText(indexPath);
-            var raw = JsonSerializer.Deserialize<List<RawDocument>>(json) ?? [];
+            indexPath = Path.GetFullPath(indexPath);
 
-            return raw
-                .Select((d, i) => new Document
-                {
-                    Id       = d.Id ?? i,
-                    Filename = d.Filename ?? string.Empty,
-                    Path     = d.Path,
-                    Text     = d.Text ?? string.Empty
-                })
-                .ToList()
-                .AsReadOnly();
+            try
+            {
+                var json = File.ReadAllText(indexPath);
+                var raw = JsonSerializer.Deserialize<List<RawDocument>>(json) ?? new List<RawDocument>();
+
+                return raw
+                    .Select((d, i) => new Document
+                    {
+                        Id       = d.Id ?? i,
+                        Filename = d.Filename ?? string.Empty,
+                        Path     = d.Path,
+                        Text     = d.Text ?? string.Empty
+                    })
+                    .ToList()
+                    .AsReadOnly();
+            }
+            catch (JsonException ex)
+            {
+                LogLoadFailed(_logger, ex, indexPath);
+                return new ReadOnlyCollection<Document>(Array.Empty<Document>());
+            }
+            catch (IOException ex)
+            {
+                LogLoadFailed(_logger, ex, indexPath);
+                return new ReadOnlyCollection<Document>(Array.Empty<Document>());
+            }
         }
-        catch (JsonException ex)
-        {
-            LogLoadFailed(_logger, ex, indexPath);
-            return new ReadOnlyCollection<Document>([]);
-        }
-        catch (IOException ex)
-        {
-            LogLoadFailed(_logger, ex, indexPath);
-            return new ReadOnlyCollection<Document>([]);
-        }
-    }
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Index file not found at {Path}")]
     private static partial void LogIndexNotFound(ILogger logger, string path);
