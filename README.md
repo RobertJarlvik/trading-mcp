@@ -7,12 +7,9 @@ Detta repository används som lokal MCP-datakälla för GitHub Copilot CLI. Repo
 - data/      — genererad index (index.json)
 
 Använd scripts/run_index.ps1 för att skapa ett virtuellt env och indexera PDF-filerna.
-Starta MCP-servern med antingen Python- eller C#-servern. Efter att index.json är skapat (scripts/run_index.ps1) kan du starta:
+Starta MCP-servern med C#-servern. Efter att index.json är skapat (scripts/run_index.ps1) kör scripts\run_dotnet_server.ps1 för att bygga och köra på http://127.0.0.1:8000 (kräver .NET 7 SDK).
 
-- Python (snabb test): scripts\run_server.ps1
-- C# (rekommenderat, produktionskvalitet): scripts\run_dotnet_server.ps1  (kräver .NET 7 SDK)
-
-Endpoints (både Python- och C#-servern implementerar samma API):
+Endpoints (C#-servern implementerar följande API):
 - GET /          — grundinfo
 - GET /documents — lista dokument (id, filename)
 - GET /document/<id> — hämta dokumenttext
