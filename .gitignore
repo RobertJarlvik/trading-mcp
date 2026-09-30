@@ -19,8 +19,8 @@ env/
 .idea/
 
 # Data and indexes
-data/
-index.json
+# data/ and index.json are tracked and will be pushed to remote
+# If you want to ignore large generated files later, adjust these patterns
 
 # Ignore large binaries (PDFs) — keep local copies but avoid committing huge files
 *.pdf
