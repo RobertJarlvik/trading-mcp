@@ -1,0 +1,30 @@
+# Visual Studio
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Python and environment
+__pycache__/
+*.pyc
+venv/
+env/
+.venv/
+
+# Editor folders
+.vscode/
+.idea/
+
+# Data and indexes
+data/
+index.json
+
+# Ignore large binaries (PDFs) — keep local copies but avoid committing huge files
+*.pdf
+
+# OS
+Thumbs.db
+.DS_Store
